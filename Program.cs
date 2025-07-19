@@ -46,7 +46,7 @@ namespace busyLightNG
             IconMenuStrip = new ContextMenuStrip();
 
             InfoButton = new ToolStripMenuItem("Info"); //Info line
-            InfoButton.Text = "BusyLightNG 1.0";
+            InfoButton.Text = "BusyLightNG 1.1";
             InfoButton.Enabled = false;
             IconMenuStrip.Items.Add(InfoButton);
 
@@ -181,9 +181,10 @@ namespace busyLightNG
             try
             {
                 RegistryKey currUser = RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Default); //Open registry hive on HKEY_CURRENT_USER
-                String[] Subkeys = currUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\microphone\\NonPackaged").GetSubKeyNames();    //Get all subfolders under the magic path
-                
                 bool MicInUse = false;  //Result register for looping with state
+
+                //First check for Win32 applications
+                String[] Subkeys = currUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\microphone\\NonPackaged").GetSubKeyNames();    //Get all subfolders under the magic path
 
                 foreach (var item in Subkeys)   //Loop across all the subfolders
                 {
@@ -193,6 +194,28 @@ namespace busyLightNG
                         MicInUse = true;    //If it is, set register
                     }
                 }
+
+                Subkeys = currUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\microphone").GetSubKeyNames();    //Get all subfolders under the magic path
+
+                foreach (var item in Subkeys)   //Loop across all the subfolders
+                {
+                    if(item == "NonPackaged")
+                    {
+                        continue;
+                    }
+                    if(currUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\microphone\\" + item).GetValue("LastUsedTimeStop") == null)   //Don't look for "LastUsedTimeStop" if it doesn't exist
+                    {
+                        continue;
+                    }
+
+                    long a = (long)currUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\microphone\\" + item).GetValue("LastUsedTimeStop");
+                    if (a == 0) //Check if last used time is zero
+                    {
+                        MicInUse = true;    //If it is, set register
+                    }
+                }
+
+                //Then check for Modern applications
 
                 if (MicInUse) 
                 {

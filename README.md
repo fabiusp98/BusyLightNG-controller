@@ -2,7 +2,7 @@
 Companion app for the [lightbar](https://git.pinciroli.xyz/fabio.pinciroli/BusyLightNG_Device)
 
 ## Working principle
-When enabled, the code checks every second what the state of the `LastUsedTimeStop` key of every folder under `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone\NonPackaged` in the Windows registry.
+When enabled, the code checks every second what the state of the `LastUsedTimeStop` key of every folder under `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone\NonPackaged` (for Win32 applications) and `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone\` (for Modern applications) in the Windows registry.
 If `LastUsedTimeStop` is 0, then the microphone is in use by that application.
 
 ## Lightbar interface

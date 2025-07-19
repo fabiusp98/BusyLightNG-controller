@@ -95,7 +95,7 @@
             labelVersion.Name = "labelVersion";
             labelVersion.Size = new Size(316, 20);
             labelVersion.TabIndex = 0;
-            labelVersion.Text = "v1.0";
+            labelVersion.Text = "v1.1";
             labelVersion.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // labelCopyright
