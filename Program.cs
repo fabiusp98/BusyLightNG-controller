@@ -6,10 +6,6 @@ namespace busyLightNG
     using busyLightNG.resources;
     using Microsoft.Win32;
 
-    /*TODO---------------------------------------------------
-     - Logica di riconnessione periodica
-    -------------------------------------------------------*/
-
     internal class Program
     {
         //Menu stuff
