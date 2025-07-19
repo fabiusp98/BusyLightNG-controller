@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "busyLightNG": {
+      "commandName": "Project",
+      "nativeDebugging": true,
+    }
+  }
+}
