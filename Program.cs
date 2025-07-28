@@ -81,13 +81,13 @@ namespace busyLightNG
 
             AboutButton = new ToolStripMenuItem("About"); //About button
             AboutButton.Image = Properties.Resources.QuestionMark;
-            AboutButton.Text = "Exit";
+            AboutButton.Text = "About";
             IconMenuStrip.Items.Add(AboutButton);
             AboutButton.Click += new System.EventHandler(AboutButtonClick);
 
             ExitButton = new ToolStripMenuItem("Exit"); //Exit button
             ExitButton.Image = Properties.Resources.Close;
-            ExitButton.Text = "About";
+            ExitButton.Text = "Exit";
             IconMenuStrip.Items.Add(ExitButton);
             ExitButton.Click += new System.EventHandler(ExitButtonClick);
 
