@@ -1,10 +1,11 @@
 namespace busyLightNG
 {
-    using System;
-    using System.IO.Ports;
-    using System.Timers;
     using busyLightNG.resources;
     using Microsoft.Win32;
+    using System;
+    using System.Configuration;
+    using System.IO.Ports;
+    using System.Timers;
 
     internal class Program
     {
@@ -103,6 +104,25 @@ namespace busyLightNG
             SPort.StopBits = StopBits.One;
             SPort.Handshake = Handshake.None;
 
+            //Autostart stuff
+            try
+            { 
+                if(ConfigurationManager.AppSettings["LastUsedPort"] != null)    //If parameter is present
+                {
+                    SPort.PortName = ConfigurationManager.AppSettings["LastUsedPort"];   //Set last used serial port
+                    SPort.Open();   //Open serial port with new port
+                    ReconnectState = false; //Show error if serial port fails
+                    UpdateStatus(); //Run status update and start timer as usual
+                    UpdateTimer.Start();
+                    icon.ShowBalloonTip(5000, "Connected to BusyLight", "Connected to BusyLight on " + ConfigurationManager.AppSettings["LastUsedPort"], ToolTipIcon.Info); //Show popup
+                }
+            }
+            catch (Exception e)
+            {
+                UpdateTimer.Stop();
+                icon.ShowBalloonTip(5000, "Runtime error", e.ToString(), ToolTipIcon.Error);    //Show popup 
+            }
+
             Application.Run();  //Spawn main thread without forms
         }
 
@@ -148,22 +168,38 @@ namespace busyLightNG
             {
                 try
                 {
+                    String SelectedPort = (string)sender.GetType().GetProperty("Name").GetValue(sender);
                     UpdateTimer.Stop(); //Stop auto update timer (if running)
                     SPort.Close();  //Close serial port
-                    SPort.PortName = (string)sender.GetType().GetProperty("Name").GetValue(sender); //Change port assignment
+                    SPort.PortName = SelectedPort; //Change port assignment
                     SPort.Open();   //Open serial port with new port
                     ReconnectState = false; //Show error if serial port fails
                     UpdateStatus(); //Run status update and start timer as usual
                     UpdateTimer.Start();
-                    icon.ShowBalloonTip(5000, "Connected to BusyLight", "Connected to BusyLight on "+ (string)sender.GetType().GetProperty("Name").GetValue(sender), ToolTipIcon.Info); //Show popup
+                    icon.ShowBalloonTip(5000, "Connected to BusyLight", "Connected to BusyLight on " + SelectedPort, ToolTipIcon.Info); //Show popup
+
+                    var configFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);    //Open config file
+                    if (ConfigurationManager.AppSettings["LastUsedPort"] == null)   //If the configuration key doesn't exist
+                    {
+                        configFile.AppSettings.Settings.Add("LastUsedPort", (string)sender.GetType().GetProperty("Name").GetValue(sender)); //Create the key, with the last selected value
+                        configFile.Save(ConfigurationSaveMode.Modified);    //Save config file
+                    }
+                    else //If the key exists, update the content
+                    {
+                        var settings = configFile.AppSettings.Settings;
+                        settings["LastUsedPort"].Value = (string)sender.GetType().GetProperty("Name").GetValue(sender);
+                        configFile.Save(ConfigurationSaveMode.Modified);
+                        ConfigurationManager.RefreshSection(configFile.AppSettings.SectionInformation.Name);
+                    }
+                    
                 }
                 catch (Exception excp)  //If serial port fails to open
                 {
                     icon.Icon = Properties.Resources.ico_err;   //Set error icon
                     icon.ShowBalloonTip(5000, "Unable to open serial port", excp.ToString(), ToolTipIcon.Error);    //Show popup
+                    //throw;
                 }
             }
-
         }
         private static void AboutButtonClick(object sender, EventArgs e)    //When about button clicked, instanciate and show about dialog
         {
